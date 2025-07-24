@@ -6,19 +6,27 @@ MEMORY
     RAM (rwx)  : ORIGIN = 0x20000000, LENGTH = 64K
 }
 
+_estack = ORIGIN(RAM) + LENGTH(RAM);
+
 SECTIONS {
-    .text : {
-        *(.isr_vector)
-        *(.text*)
-        *(.rodata*)
-    } > FLASH
+  .text : {
+    KEEP(*(.isr_vector))
+    *(.text*)
+    *(.rodata*)
+  } > FLASH
 
-    .data : {
-        *(.data*)
-    } > RAM
+  .data : AT (ADDR(.text) + SIZEOF(.text)) {
+    _sdata = .;
+    *(.data*)
+    _edata = .;
+  } > RAM
 
-    .bss : {
-        *(.bss*)
-        *(COMMON)
-    } > RAM
+  .bss : {
+    _sbss = .;
+    *(.bss*)
+    *(COMMON)
+    _ebss = .;
+  } > RAM
+
+  _sidata = LOADADDR(.data);
 }
