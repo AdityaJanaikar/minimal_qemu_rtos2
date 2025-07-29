@@ -1,20 +1,21 @@
-TARGET = hello
-CC = arm-none-eabi-g++
-LD = arm-none-eabi-ld
-OBJCOPY = arm-none-eabi-objcopy
+CC=arm-none-eabi-g++
+AS=arm-none-eabi-as
+LD=arm-none-eabi-ld
+CFLAGS=-mcpu=cortex-m3 -mthumb -nostdlib -Os -ffreestanding
 
-+CFLAGS = -mcpu=cortex-m3 -mthumb -nostdlib -Os -ffreestanding -fno-exceptions -fno-rtti
-LDFLAGS = -T linker.ld
+all: hello.elf
 
-all: $(TARGET).elf
+hello.elf: main.o startup.o
+	$(LD) -T linker.ld $^ -o $@
 
-$(TARGET).elf: startup.s main.cpp linker.ld
-	$(CC) $(CFLAGS) -c main.cpp -o main.o
-	arm-none-eabi-as -mcpu=cortex-m3 -mthumb startup.s -o startup.o
-	$(LD) $(LDFLAGS) main.o startup.o -o $(TARGET).elf
+main.o: main.cpp
+	$(CC) $(CFLAGS) -c $< -o $@
 
-run: $(TARGET).elf
-	qemu-system-arm -M lm3s6965evb -nographic -kernel $(TARGET).elf
+startup.o: startup.s
+	$(AS) -mcpu=cortex-m3 -mthumb $< -o $@
 
 clean:
 	rm -f *.o *.elf
+
+run: hello.elf
+	qemu-system-arm -M lm3s6965evb -nographic -kernel hello.elf
