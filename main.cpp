@@ -5,5 +5,5 @@ extern "C" int main() {
         *UART0DR = (unsigned int)(*message);
         message++;
     }
-    while (1);
+    //while (1);
 }
